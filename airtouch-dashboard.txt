@@ -1,0 +1,526 @@
+type: custom:stack-in-card
+mode: vertical
+cards:
+  - show_name: true
+    show_icon: false
+    type: custom:mushroom-title-card
+    title: >
+      {%   if is_state('climate.ac_fujitsu', 'fan_only') %} House Fan Only {{
+      state_attr('climate.ac_fujitsu', 'fan_mode') | title }}
+
+      {% elif is_state('climate.ac_fujitsu', 'cool') %} House Cooling {{
+      state_attr('climate.ac_fujitsu', 'fan_mode') | title }}
+
+      {% elif is_state('climate.ac_fujitsu', 'heat') %} House Heating {{
+      state_attr('climate.ac_fujitsu', 'fan_mode') | title }}
+
+      {% elif is_state('climate.ac_fujitsu', 'dry') %} House Dehumidify {{
+      state_attr('climate.ac_fujitsu', 'fan_mode') | title }}
+
+      {% elif is_state('climate.ac_fujitsu', 'off') %} House A/C Off
+
+      {% else %} Airtouch
+
+      {% endif %} - Alt
+  - type: custom:stack-in-card
+    mode: vertical
+    cards:
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+          - type: custom:mushroom-template-card
+            entity: climate.ac_fujitsu
+            icon: mdi:fan
+            primary: >
+              {%   if is_state('climate.ac_fujitsu', 'fan_only') %} Airtouch Fan
+              Only 
+
+              {% elif is_state('climate.ac_fujitsu', 'cool') %} Airtouch
+              Cooling 
+
+              {% elif is_state('climate.ac_fujitsu', 'heat') %} Airtouch
+              Heating 
+
+              {% elif is_state('climate.ac_fujitsu', 'dry') %} Airtouch
+              Dehumidify 
+
+              {% elif is_state('climate.ac_fujitsu', 'off') %} Airtouch Off
+
+              {% endif %}
+            secondary: |
+              {% if is_state(config.entity, 'off') %}
+              {% else %} Fan {{ state_attr(config.entity, "fan_mode") |title }}
+              {% endif %}
+            icon_color: |
+              {%   if is_state(entity, 'off') %} grey
+              {% elif is_state('climate.ac_fujitsu', 'fan_only') %} teal
+              {% elif is_state('climate.ac_fujitsu', 'cool') %} blue
+              {% elif is_state('climate.ac_fujitsu', 'heat') %} red
+              {% elif is_state('climate.ac_fujitsu', 'dry') %} orange
+              {% elif is_state('climate.ac_fujitsu', 'off') %} grey
+              {% else %} grey
+              {% endif %}
+            card_mod:
+              style: |
+                ha-state-icon {
+                  {% if is_state(config.entity, 'off') %}
+                    animation: ;
+                  {% elif is_state_attr(config.entity, 'fan_mode', 'auto') %}
+                    animation: spin 2.25s ease-in-out infinite alternate;
+                  {% elif is_state_attr(config.entity, 'fan_mode', 'focus') %}
+                    animation: spin 0.75s linear infinite;
+                  {% elif is_state_attr(config.entity, 'fan_mode', 'high') %}
+                    animation: spin 1.0s linear infinite;
+                  {% elif is_state_attr(config.entity, 'fan_mode', 'medium') %}
+                    animation: spin 1.5s linear infinite;
+                  {% elif is_state_attr(config.entity, 'fan_mode', 'low') %}
+                    animation: spin 3s linear infinite;
+                  {% else %}
+                  {% endif %}
+                  }
+          - type: custom:mushroom-climate-card
+            entity: climate.ac_fujitsu
+            hvac_modes:
+              - heat
+              - cool
+              - dry
+              - fan_only
+              - 'off'
+            collapsible_controls: false
+            show_temperature_control: false
+            secondary_info: none
+            primary_info: none
+            name: Airtouch
+            hold_action:
+              action: more-info
+            tap_action:
+              action: none
+            double_tap_action:
+              action: none
+            layout: horizontal
+            fill_container: false
+            icon: ''
+            icon_type: none
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+          - type: grid
+            square: false
+            columns: 5
+            cards:
+              - type: custom:mushroom-template-card
+                layout: vertical
+                primary: Low
+                tap_action:
+                  action: call-service
+                  service: climate.set_fan_mode
+                  data:
+                    fan_mode: low
+                  target:
+                    entity_id: climate.ac_fujitsu
+              - type: custom:mushroom-template-card
+                layout: vertical
+                primary: Med
+                tap_action:
+                  action: call-service
+                  service: climate.set_fan_mode
+                  data:
+                    fan_mode: medium
+                  target:
+                    entity_id: climate.ac_fujitsu
+              - type: custom:mushroom-template-card
+                layout: vertical
+                primary: High
+                tap_action:
+                  action: call-service
+                  service: climate.set_fan_mode
+                  data:
+                    fan_mode: high
+                  target:
+                    entity_id: climate.ac_fujitsu
+              - type: custom:mushroom-template-card
+                layout: vertical
+                primary: Turbo
+                tap_action:
+                  action: call-service
+                  service: climate.set_fan_mode
+                  data:
+                    fan_mode: focus
+                  target:
+                    entity_id: climate.ac_fujitsu
+              - type: custom:mushroom-template-card
+                layout: vertical
+                primary: Auto
+                tap_action:
+                  action: call-service
+                  service: climate.set_fan_mode
+                  data:
+                    fan_mode: auto
+                  target:
+                    entity_id: climate.ac_fujitsu
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+          - type: custom:mushroom-template-card
+            primary: >-
+              Master  {{ state_attr('climate.itc_master', 'current_temperature')
+              }}°C
+            secondary: >
+              {% if is_state('sensor.climate_master_mode', 'ITC') %} Target {{
+              state_attr('climate.itc_master', 'temperature') | int }} °C  (@{{
+                state_attr('fan.damper_master', 'percentage') }}% fan)
+
+              {% else %} Damper {{ state_attr('fan.damper_master', 'percentage')
+              }} %
+
+              {% endif %}
+            icon: >
+              {% if is_state('climate.itc_master' ,'off') %} mdi:fan-off {% elif
+              state_attr('climate.itc_master', 'preset_mode') == 'ITC' %}
+              mdi:thermometer-auto {% elif state_attr('climate.itc_master',
+              'preset_mode') == 'Damper' %}  mdi:fan {% else %}
+              mdi:help-circle-outline {% endif %}
+            icon_color: |
+              {%   if is_state(entity, 'off') %} grey
+              {% elif is_state('climate.ac_fujitsu', 'fan_only') %} teal
+              {% elif is_state('climate.ac_fujitsu', 'cool') %} blue
+              {% elif is_state('climate.ac_fujitsu', 'heat') %} red
+              {% elif is_state('climate.ac_fujitsu', 'dry') %} orange
+              {% elif is_state('climate.ac_fujitsu', 'off') %} grey
+              {% else %} grey
+              {% endif %}
+            entity: climate.itc_master
+            multiline_secondary: false
+            tap_action:
+              action: call-service
+              service: script.master_zone_toggle
+              data: {}
+              target: {}
+            double_tap_action:
+              action: call-service
+              service: script.climate_master_mode
+              target: {}
+            card-mod:
+              style:
+                mushroom-shape-icon$: |
+                  .shape:active {
+                    transform: scale(1.2);
+                  }
+          - type: conditional
+            conditions:
+              - entity: climate.itc_master
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_master_mode
+                state: ITC
+            card:
+              type: custom:mushroom-climate-card
+              entity: climate.itc_master
+              secondary_info: none
+              primary_info: none
+              show_temperature_control: true
+              layout: horizontal
+              icon: ''
+              icon_type: none
+          - type: conditional
+            conditions:
+              - entity: climate.itc_master
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_master_mode
+                state: Damper
+            card:
+              type: custom:mushroom-fan-card
+              entity: fan.damper_master
+              icon: ''
+              icon_type: none
+              icon_animation: false
+              fill_container: false
+              show_percentage_control: true
+              layout: horizontal
+              show_oscillate_control: false
+              collapsible_controls: true
+              primary_info: none
+              secondary_info: none
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+          - type: custom:mushroom-template-card
+            primary: >-
+              Office {{ state_attr('climate.itc_office', 'current_temperature')
+              }}°C
+            secondary: >
+              {% if is_state('sensor.climate_office_mode', 'ITC') %} Target {{
+              state_attr('climate.itc_office', 'temperature') | int }} °C  (@{{
+              state_attr('fan.damper_office', 'percentage') }}% fan)
+
+              {% else %} Damper {{ state_attr('fan.damper_office', 'percentage')
+              }} %
+
+              {% endif %}
+            icon: >
+              {% if is_state('climate.itc_office' ,'off') %} mdi:fan-off {% elif
+              state_attr('climate.itc_office', 'preset_mode') == 'ITC' %}
+              mdi:thermometer-auto {% elif state_attr('climate.itc_office',
+              'preset_mode') == 'Damper' %}  mdi:fan {% else %}
+              mdi:help-circle-outline {% endif %}
+            icon_color: |
+              {%   if is_state(entity, 'off') %} grey
+              {% elif is_state('climate.ac_fujitsu', 'fan_only') %} teal
+              {% elif is_state('climate.ac_fujitsu', 'cool') %} blue
+              {% elif is_state('climate.ac_fujitsu', 'heat') %} red
+              {% elif is_state('climate.ac_fujitsu', 'dry') %} orange
+              {% elif is_state('climate.ac_fujitsu', 'off') %} grey
+              {% else %} grey
+              {% endif %}
+            entity: climate.itc_office
+            multiline_secondary: false
+            tap_action:
+              action: call-service
+              service: script.office_zone_toggle
+              data: {}
+              target: {}
+            double_tap_action:
+              action: call-service
+              service: script.climate_office_mode
+              target: {}
+            card-mod:
+              style:
+                mushroom-shape-icon$: |
+                  .shape:active {
+                    transform: scale(1.2);
+                  }
+          - type: conditional
+            conditions:
+              - entity: climate.itc_office
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_office_mode
+                state: ITC
+            card:
+              type: custom:mushroom-climate-card
+              entity: climate.itc_office
+              secondary_info: none
+              primary_info: none
+              show_temperature_control: true
+              layout: horizontal
+              icon: ''
+              icon_type: none
+          - type: conditional
+            conditions:
+              - entity: climate.itc_office
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_office_mode
+                state: Damper
+            card:
+              type: custom:mushroom-fan-card
+              entity: fan.damper_office
+              icon: ''
+              icon_type: none
+              icon_animation: false
+              fill_container: false
+              show_percentage_control: true
+              layout: horizontal
+              show_oscillate_control: false
+              collapsible_controls: true
+              primary_info: none
+              secondary_info: none
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+          - type: custom:mushroom-template-card
+            primary: >-
+              Living  {{ state_attr('climate.itc_living', 'current_temperature')
+              }}°C
+            secondary: >
+              {% if is_state('sensor.climate_living_mode', 'ITC') %} Target {{
+              state_attr('climate.itc_living', 'temperature') | int }} °C  (@{{
+                state_attr('fan.damper_living', 'percentage') }}% fan)
+
+              {% else %} Damper {{ state_attr('fan.damper_living', 'percentage')
+              }} %
+
+              {% endif %}
+            icon: >
+              {% if is_state('climate.itc_living' ,'off') %} mdi:fan-off {% elif
+              state_attr('climate.itc_living', 'preset_mode') == 'ITC' %}
+              mdi:thermometer-auto {% elif state_attr('climate.itc_living',
+              'preset_mode') == 'Damper' %}  mdi:fan {% else %}
+              mdi:help-circle-outline {% endif %}
+            icon_color: |
+              {%   if is_state(entity, 'off') %} grey
+              {% elif is_state('climate.ac_fujitsu', 'fan_only') %} teal
+              {% elif is_state('climate.ac_fujitsu', 'cool') %} blue
+              {% elif is_state('climate.ac_fujitsu', 'heat') %} red
+              {% elif is_state('climate.ac_fujitsu', 'dry') %} orange
+              {% elif is_state('climate.ac_fujitsu', 'off') %} grey
+              {% else %} grey
+              {% endif %}
+            entity: climate.itc_living
+            multiline_secondary: false
+            tap_action:
+              action: call-service
+              service: script.living_zone_toggle
+              data: {}
+              target: {}
+            double_tap_action:
+              action: call-service
+              service: script.climate_living_mode
+              target: {}
+            card-mod:
+              style:
+                mushroom-shape-icon$: |
+                  .shape:active {
+                    transform: scale(1.2);
+                  }
+          - type: conditional
+            conditions:
+              - entity: climate.itc_living
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_living_mode
+                state: ITC
+            card:
+              type: custom:mushroom-climate-card
+              entity: climate.itc_living
+              secondary_info: none
+              primary_info: none
+              show_temperature_control: true
+              layout: horizontal
+              icon: ''
+              icon_type: none
+          - type: conditional
+            conditions:
+              - entity: climate.itc_living
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_living_mode
+                state: Damper
+            card:
+              type: custom:mushroom-fan-card
+              entity: fan.damper_living
+              icon: ''
+              icon_type: none
+              icon_animation: false
+              fill_container: false
+              show_percentage_control: true
+              layout: horizontal
+              show_oscillate_control: false
+              collapsible_controls: true
+              primary_info: none
+              secondary_info: none
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+          - type: custom:mushroom-template-card
+            primary: >-
+              Lounge {{ state_attr('climate.itc_lounge', 'current_temperature')
+              }}°C
+            secondary: >
+              {% if is_state('sensor.climate_lounge_mode', 'ITC') %} Target {{
+              state_attr('climate.itc_lounge', 'temperature') | int }} °C  (@{{
+              state_attr('fan.damper_lounge', 'percentage') }}% fan)
+
+              {% else %} Damper {{ state_attr('fan.damper_lounge', 'percentage')
+              }} %
+
+              {% endif %}
+            icon: >
+              {% if is_state('climate.itc_lounge' ,'off') %} mdi:fan-off
+
+              {% elif state_attr('climate.itc_lounge', 'preset_mode') == 'ITC'
+              %} mdi:thermometer-auto
+
+              {% elif state_attr('climate.itc_lounge', 'preset_mode') ==
+              'Damper' %}  mdi:fan
+
+              {% else %} mdi:help-circle-outline
+
+              {% endif %}
+            icon_color: |
+              {%   if is_state(entity, 'off') %} grey
+              {% elif is_state('climate.ac_fujitsu', 'fan_only') %} teal
+              {% elif is_state('climate.ac_fujitsu', 'cool') %} blue
+              {% elif is_state('climate.ac_fujitsu', 'heat') %} red
+              {% elif is_state('climate.ac_fujitsu', 'dry') %} orange
+              {% elif is_state('climate.ac_fujitsu', 'off') %} grey
+              {% else %} grey
+              {% endif %}
+            entity: climate.itc_lounge
+            multiline_secondary: false
+            tap_action:
+              action: call-service
+              service: script.lounge_zone_toggle
+              data: {}
+              target: {}
+            double_tap_action:
+              action: call-service
+              service: script.climate_lounge_mode
+              target: {}
+            card-mod:
+              style:
+                mushroom-shape-icon$: |
+                  .shape:active {
+                    transform: scale(1.2);
+                  }
+          - type: conditional
+            conditions:
+              - entity: climate.itc_lounge
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_lounge_mode
+                state: ITC
+            card:
+              type: custom:mushroom-climate-card
+              entity: climate.itc_lounge
+              secondary_info: none
+              primary_info: none
+              show_temperature_control: true
+              layout: horizontal
+              icon: ''
+              icon_type: none
+          - type: conditional
+            conditions:
+              - entity: climate.itc_lounge
+                state: auto
+              - entity: climate.ac_fujitsu
+                state_not: 'off'
+              - entity: climate.ac_fujitsu
+                state_not: fan_only
+              - entity: sensor.climate_lounge_mode
+                state: Damper
+            card:
+              type: custom:mushroom-fan-card
+              entity: fan.damper_lounge
+              icon: ''
+              icon_type: none
+              icon_animation: false
+              fill_container: false
+              show_percentage_control: true
+              layout: horizontal
+              show_oscillate_control: false
+              collapsible_controls: true
+              primary_info: none
+              secondary_info: none
